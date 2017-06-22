@@ -1,38 +1,36 @@
+/*--------------------------------------------------------------------------
+
+neuron-gpgpu - neural network written in javascript backed by webgl.
+
+The MIT License (MIT)
+
+Copyright (c) 2017 Haydn Paterson (sinclair) <haydn.developer@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+---------------------------------------------------------------------------*/
+
 import * as gpu   from "./gpu/index"
 import * as net   from "./net/index"
 
-
-const context = new gpu.Context()
-const network = new net.Network(context, [
-  new net.Tensor(2),
-  new net.Tensor(5),
-  new net.Tensor(3),
-  new net.Tensor(1)
-])
-
-window.addEventListener("load", () => {
-  let element = document.getElementById("output") as HTMLPreElement
-  let iteration = 0
-  const step = () => {
-    window.requestAnimationFrame(() => {
-      
-      network.backward([0, 0], [0])
-      network.backward([0, 1], [1])
-      network.backward([1, 0], [1])
-      network.backward([1, 1], [0])
-
-      const output = `
-        iteration: ${iteration}
-        [0, 0] ${network.forward([0, 0])}
-        [0, 1] ${network.forward([0, 1])}
-        [1, 0] ${network.forward([1, 0])}
-        [1, 1] ${network.forward([1, 1])}
-      `
-      element.innerHTML = output
-      iteration += 1
-      step()
-    })
-  }
-  step()
-})
+export {
+  gpu,
+  net
+}
 

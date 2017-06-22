@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": "tsc-bundle ./src/index.ts ./bin/neuron-gpu.js --watch --removeComments"
+    "watch": "tsc-bundle ./test/index.ts ./bin/neuron.js --watch --removeComments"
   },
   "keywords": [
     "neural",
