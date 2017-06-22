@@ -9,6 +9,7 @@ This project is a small experiment to test processing forward and back propagati
 ### example
 
 ```javascript
+
 //------------------------------------------------------
 //  network topology
 //
@@ -21,6 +22,8 @@ This project is a small experiment to test processing forward and back propagati
 //     0      <--- output layer
 //
 //------------------------------------------------------
+import {gpu, net} from "neuron"
+
 const context = new gpu.Context()
 const network = new net.Network(context, [
   new net.Tensor(2),
