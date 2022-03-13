@@ -20,31 +20,22 @@ __export(gpu_exports, {
 });
 
 // libs/neuron/gpu/color.ts
-var compute_texture_dimensions = (length) => {
-  let x = Math.ceil(Math.sqrt(length));
+var computeTextureDimensions = (length2) => {
+  let x = Math.ceil(Math.sqrt(length2));
   x = x < 4 ? 4 : x;
-  return { width: x, height: x };
+  return [x, x];
 };
 var Color1D = class {
-  type;
-  context;
-  framebuf;
-  width;
-  texture;
-  textureWidth;
-  textureHeight;
-  textureData;
-  data;
-  constructor(context2, framebuf, length) {
-    const { width, height } = compute_texture_dimensions(length);
-    this.type = "Color1D";
+  constructor(context2, framebuf, width) {
     this.context = context2;
     this.framebuf = framebuf;
-    this.width = length;
-    this.textureWidth = width;
-    this.textureHeight = height;
-    this.textureData = new Uint8Array(width * height * 4);
-    this.data = new Uint8Array(this.textureData.buffer, 0, length * 4);
+    this.width = width;
+    this.type = "Color1D";
+    const [textureWidth, textureHeight] = computeTextureDimensions(this.width);
+    this.textureData = new Uint8Array(textureWidth * textureHeight * 4);
+    this.data = new Uint8Array(this.textureData.buffer, 0, this.width * 4);
+    this.textureWidth = textureWidth;
+    this.textureHeight = textureHeight;
     this.texture = this.context.createTexture();
     this.context.bindTexture(this.context.TEXTURE_2D, this.texture);
     this.context.texParameteri(this.context.TEXTURE_2D, this.context.TEXTURE_MIN_FILTER, this.context.NEAREST);
@@ -54,14 +45,15 @@ var Color1D = class {
     this.context.bindTexture(this.context.TEXTURE_2D, null);
     this.push();
   }
+  type;
+  texture;
+  textureWidth;
+  textureHeight;
+  textureData;
+  data;
   get(x) {
     const index = x * 4;
-    return [
-      this.data[index + 0],
-      this.data[index + 1],
-      this.data[index + 2],
-      this.data[index + 3]
-    ];
+    return [this.data[index + 0], this.data[index + 1], this.data[index + 2], this.data[index + 3]];
   }
   set(x, c) {
     const index = x * 4;
@@ -98,22 +90,12 @@ var Color1D = class {
   }
 };
 var Color2D = class {
-  type;
-  context;
-  framebuf;
-  width;
-  height;
-  texture;
-  textureWidth;
-  textureHeight;
-  textureData;
-  data;
   constructor(context2, framebuf, width, height) {
-    this.type = "Color2D";
     this.context = context2;
     this.framebuf = framebuf;
     this.width = width;
     this.height = height;
+    this.type = "Color2D";
     this.textureWidth = width;
     this.textureHeight = height;
     this.textureData = new Uint8Array(width * height * 4);
@@ -127,14 +109,15 @@ var Color2D = class {
     this.context.bindTexture(this.context.TEXTURE_2D, null);
     this.push();
   }
+  type;
+  texture;
+  textureWidth;
+  textureHeight;
+  textureData;
+  data;
   get(x, y) {
     const index = (x + y * this.width) * 4;
-    return [
-      this.data[index + 0],
-      this.data[index + 1],
-      this.data[index + 2],
-      this.data[index + 3]
-    ];
+    return [this.data[index + 0], this.data[index + 1], this.data[index + 2], this.data[index + 3]];
   }
   set(x, y, c) {
     const index = (x + y * this.width) * 4;
@@ -173,29 +156,21 @@ var Color2D = class {
   }
 };
 var Color3D = class {
-  type;
-  context;
-  framebuf;
-  width;
-  height;
-  depth;
-  texture;
-  textureWidth;
-  textureHeight;
-  textureData;
-  data;
   constructor(context2, framebuf, width, height, depth) {
-    const size = compute_texture_dimensions(width * height * depth);
-    this.type = "Color3D";
     this.context = context2;
     this.framebuf = framebuf;
     this.width = width;
     this.height = height;
     this.depth = depth;
-    this.textureWidth = size.width;
-    this.textureHeight = size.height;
-    this.textureData = new Uint8Array(size.width * size.height * 4);
+    this.type = "Color3D";
+    this.width = width;
+    this.height = height;
+    this.depth = depth;
+    const [textureWidth, textureHeight] = computeTextureDimensions(width * height * depth);
+    this.textureData = new Uint8Array(textureWidth * textureHeight * 4);
     this.data = new Uint8Array(this.textureData.buffer, 0, width * height * depth * 4);
+    this.textureWidth = textureWidth;
+    this.textureHeight = textureHeight;
     this.texture = this.context.createTexture();
     this.context.bindTexture(this.context.TEXTURE_2D, this.texture);
     this.context.texParameteri(this.context.TEXTURE_2D, this.context.TEXTURE_MIN_FILTER, this.context.NEAREST);
@@ -205,14 +180,15 @@ var Color3D = class {
     this.context.bindTexture(this.context.TEXTURE_2D, null);
     this.push();
   }
+  type;
+  texture;
+  textureWidth;
+  textureHeight;
+  textureData;
+  data;
   get(x, y, z) {
     const index = (x + y * this.width + z * (this.width * this.height)) * 4;
-    return [
-      this.data[index + 0],
-      this.data[index + 1],
-      this.data[index + 2],
-      this.data[index + 3]
-    ];
+    return [this.data[index + 0], this.data[index + 1], this.data[index + 2], this.data[index + 3]];
   }
   set(x, y, z, c) {
     const index = (x + y * this.width + z * (this.width * this.height)) * 4;
@@ -254,31 +230,22 @@ var Color3D = class {
 };
 
 // libs/neuron/gpu/float.ts
-var compute_texture_dimensions2 = (length) => {
-  let x = Math.ceil(Math.sqrt(length));
+var computeTextureDimensions2 = (length2) => {
+  let x = Math.ceil(Math.sqrt(length2));
   x = x < 4 ? 4 : x;
-  return { width: x, height: x };
+  return [x, x];
 };
 var Float1D = class {
-  type;
-  context;
-  framebuf;
-  width;
-  texture;
-  textureWidth;
-  textureHeight;
-  textureData;
-  data;
-  constructor(context2, framebuf, length) {
-    const { width, height } = compute_texture_dimensions2(length);
-    this.type = "Float1D";
+  constructor(context2, framebuf, width) {
     this.context = context2;
     this.framebuf = framebuf;
-    this.width = length;
-    this.textureWidth = width;
-    this.textureHeight = height;
-    this.textureData = new Uint8Array(width * height * 4);
+    this.width = width;
+    this.type = "Float1D";
+    const [textureWidth, textureHeight] = computeTextureDimensions2(length);
+    this.textureData = new Uint8Array(textureWidth * textureHeight * 4);
     this.data = new Float32Array(this.textureData.buffer, 0, this.width);
+    this.textureWidth = textureWidth;
+    this.textureHeight = textureHeight;
     this.texture = this.context.createTexture();
     this.context.bindTexture(this.context.TEXTURE_2D, this.texture);
     this.context.texParameteri(this.context.TEXTURE_2D, this.context.TEXTURE_MIN_FILTER, this.context.NEAREST);
@@ -288,6 +255,12 @@ var Float1D = class {
     this.context.bindTexture(this.context.TEXTURE_2D, null);
     this.push();
   }
+  type;
+  texture;
+  textureWidth;
+  textureHeight;
+  textureData;
+  data;
   get(x) {
     return this.data[x];
   }
@@ -322,22 +295,12 @@ var Float1D = class {
   }
 };
 var Float2D = class {
-  type;
-  context;
-  framebuf;
-  width;
-  height;
-  texture;
-  textureWidth;
-  textureHeight;
-  textureData;
-  data;
   constructor(context2, framebuf, width, height) {
-    this.type = "Float2D";
     this.context = context2;
     this.framebuf = framebuf;
     this.width = width;
     this.height = height;
+    this.type = "Float2D";
     this.textureWidth = width;
     this.textureHeight = height;
     this.textureData = new Uint8Array(width * height * 4);
@@ -351,6 +314,12 @@ var Float2D = class {
     this.context.bindTexture(this.context.TEXTURE_2D, null);
     this.push();
   }
+  type;
+  texture;
+  textureWidth;
+  textureHeight;
+  textureData;
+  data;
   get(x, y) {
     return this.data[x + y * this.width];
   }
@@ -387,29 +356,18 @@ var Float2D = class {
   }
 };
 var Float3D = class {
-  type;
-  context;
-  framebuf;
-  width;
-  height;
-  depth;
-  texture;
-  textureWidth;
-  textureHeight;
-  textureData;
-  data;
   constructor(context2, framebuf, width, height, depth) {
-    const size = compute_texture_dimensions2(width * height * depth);
-    this.type = "Float3D";
     this.context = context2;
     this.framebuf = framebuf;
     this.width = width;
     this.height = height;
     this.depth = depth;
-    this.textureWidth = size.width;
-    this.textureHeight = size.height;
-    this.textureData = new Uint8Array(size.width * size.height * 4);
+    this.type = "Float3D";
+    const [textureWidth, textureHeight] = computeTextureDimensions2(width * height * depth);
+    this.textureData = new Uint8Array(textureWidth * textureHeight * 4);
     this.data = new Float32Array(this.textureData.buffer, 0, width * height * depth);
+    this.textureWidth = textureWidth;
+    this.textureHeight = textureHeight;
     this.texture = this.context.createTexture();
     this.context.bindTexture(this.context.TEXTURE_2D, this.texture);
     this.context.texParameteri(this.context.TEXTURE_2D, this.context.TEXTURE_MIN_FILTER, this.context.NEAREST);
@@ -419,6 +377,12 @@ var Float3D = class {
     this.context.bindTexture(this.context.TEXTURE_2D, null);
     this.push();
   }
+  type;
+  texture;
+  textureWidth;
+  textureHeight;
+  textureData;
+  data;
   get(x, y, z) {
     return this.data[x + y * this.width + z * (this.width * this.height)];
   }
@@ -859,11 +823,7 @@ var endianness = (() => {
     return "BE";
   throw new Error("unknown endianness");
 })();
-var get_thread_directives = () => [
-  "#version 300 es",
-  "precision highp float;",
-  ""
-].join("\n");
+var get_thread_directives = () => ["#version 300 es", "precision highp float;", ""].join("\n");
 var get_thread_integer_mod = () => [
   "vec2 nc_int_mod(vec2 x, float y) {",
   "  vec2 res = floor(mod(x, y));",
@@ -1065,16 +1025,7 @@ var transform = (code) => {
   code = replace_thread_output_indexer(code);
   code = replace_thread_output_dimensions(code);
   code = replace_thread_signature(code);
-  const fragment = [
-    get_thread_directives(),
-    get_thread_uniforms(),
-    get_thread_output_register(thread),
-    get_thread_integer_mod(),
-    get_thread_encode_functions(),
-    get_thread_select_functions(),
-    code,
-    get_thread_main(thread)
-  ].join("\n");
+  const fragment = [get_thread_directives(), get_thread_uniforms(), get_thread_output_register(thread), get_thread_integer_mod(), get_thread_encode_functions(), get_thread_select_functions(), code, get_thread_main(thread)].join("\n");
   return {
     thread,
     uniforms,
@@ -1376,42 +1327,13 @@ var Plane = class {
     this.context = context2;
     this.position = this.context.createBuffer();
     this.context.bindBuffer(this.context.ARRAY_BUFFER, this.position);
-    this.context.bufferData(this.context.ARRAY_BUFFER, new Float32Array([
-      -1,
-      -1,
-      0,
-      -1,
-      1,
-      0,
-      1,
-      1,
-      0,
-      1,
-      -1,
-      0
-    ]), this.context.STATIC_DRAW);
+    this.context.bufferData(this.context.ARRAY_BUFFER, new Float32Array([-1, -1, 0, -1, 1, 0, 1, 1, 0, 1, -1, 0]), this.context.STATIC_DRAW);
     this.texcoord = this.context.createBuffer();
     this.context.bindBuffer(this.context.ARRAY_BUFFER, this.texcoord);
-    this.context.bufferData(this.context.ARRAY_BUFFER, new Float32Array([
-      0,
-      0,
-      0,
-      1,
-      1,
-      1,
-      1,
-      0
-    ]), this.context.STATIC_DRAW);
+    this.context.bufferData(this.context.ARRAY_BUFFER, new Float32Array([0, 0, 0, 1, 1, 1, 1, 0]), this.context.STATIC_DRAW);
     this.indices = this.context.createBuffer();
     this.context.bindBuffer(this.context.ELEMENT_ARRAY_BUFFER, this.indices);
-    this.context.bufferData(this.context.ELEMENT_ARRAY_BUFFER, new Uint16Array([
-      0,
-      1,
-      2,
-      2,
-      3,
-      0
-    ]), this.context.STATIC_DRAW);
+    this.context.bufferData(this.context.ELEMENT_ARRAY_BUFFER, new Uint16Array([0, 1, 2, 2, 3, 0]), this.context.STATIC_DRAW);
   }
   position;
   texcoord;
@@ -1435,8 +1357,8 @@ var Context = class {
   createProgram(source) {
     return new Program(this.context, this.framebuf, this.plane, source);
   }
-  createColor1D(length) {
-    return new Color1D(this.context, this.framebuf, length);
+  createColor1D(length2) {
+    return new Color1D(this.context, this.framebuf, length2);
   }
   createColor2D(width, height) {
     return new Color2D(this.context, this.framebuf, width, height);
@@ -1444,8 +1366,8 @@ var Context = class {
   createColor3D(width, height, depth) {
     return new Color3D(this.context, this.framebuf, width, height, depth);
   }
-  createFloat1D(length) {
-    return new Float1D(this.context, this.framebuf, length);
+  createFloat1D(length2) {
+    return new Float1D(this.context, this.framebuf, length2);
   }
   createFloat2D(width, height) {
     return new Float2D(this.context, this.framebuf, width, height);
@@ -1647,9 +1569,7 @@ var Network = class {
     }
     this.kernels[0].input.vector.push();
     this.kernels.forEach((kernel) => {
-      kernel.programs.forward.program0.execute([
-        kernel.output.vector
-      ], {
+      kernel.programs.forward.program0.execute([kernel.output.vector], {
         input: kernel.input.vector,
         matrix: kernel.weights0.matrix
       });
@@ -1668,17 +1588,13 @@ var Network = class {
     this.forward(input, false);
     this.expect.map((x) => expect[x]).push();
     const kernel = this.kernels[this.kernels.length - 1];
-    kernel.programs.backward.program0.execute([
-      kernel.output.gradients
-    ], {
+    kernel.programs.backward.program0.execute([kernel.output.gradients], {
       actual: kernel.output.vector,
       expect: this.expect
     });
     for (let k = this.kernels.length - 1; k > -1; k--) {
       const kernel2 = this.kernels[k];
-      kernel2.programs.backward.program1.execute([
-        kernel2.input.gradients
-      ], {
+      kernel2.programs.backward.program1.execute([kernel2.input.gradients], {
         matrix: kernel2.weights0.matrix,
         input_vector: kernel2.input.vector,
         output_gradients: kernel2.output.gradients
@@ -1686,10 +1602,7 @@ var Network = class {
     }
     for (let k = this.kernels.length - 1; k > -1; k--) {
       const kernel2 = this.kernels[k];
-      kernel2.programs.backward.program2.execute([
-        kernel2.weights1.matrix,
-        kernel2.weights1.deltas
-      ], {
+      kernel2.programs.backward.program2.execute([kernel2.weights1.matrix, kernel2.weights1.deltas], {
         momentum: this.momentum,
         step: this.step,
         deltas: kernel2.weights0.deltas,

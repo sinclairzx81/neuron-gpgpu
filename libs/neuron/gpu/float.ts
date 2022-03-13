@@ -28,50 +28,28 @@ THE SOFTWARE.
 
 import { Disposable } from './dispose'
 
-/**
- * computes the square width and height of a buffer to hold the given length.
- * @param {number} length the length to compute.
- * @returns {{width, height}}
- */
-export const compute_texture_dimensions = (length: number): { width: number; height: number } => {
+
+export const computeTextureDimensions = (length: number): [width: number, height: number] => {
   let x = Math.ceil(Math.sqrt(length))
   x = x < 4 ? 4 : x
-  return { width: x, height: x }
+  return [x, x]
 }
 
-/**
- * Float1D
- *
- * A 1 dimensional float buffer.
- */
 export class Float1D implements Disposable {
   public type: 'Float1D'
-  public context: WebGL2RenderingContext
-  public framebuf: WebGLFramebuffer
-  public width: number
   public texture: WebGLTexture
   public textureWidth: number
   public textureHeight: number
   public textureData: Uint8Array
   public data: Float32Array
 
-  /**
-   * creates a new Float1D float buffer.
-   * @param {WebGL2RenderingContext} context the webgl rendering context.
-   * @param {WebGLFrameBuffer} framebuf the webgl framebuffer.
-   * @param {number} length the length of this data array.
-   * @returns {Float1D}
-   */
-  constructor(context: WebGL2RenderingContext, framebuf: WebGLFramebuffer, length: number) {
-    const { width, height } = compute_texture_dimensions(length)
+  constructor(private readonly context: WebGL2RenderingContext, private readonly framebuf: WebGLFramebuffer, public readonly width: number) {
     this.type = 'Float1D'
-    this.context = context
-    this.framebuf = framebuf
-    this.width = length
-    this.textureWidth = width
-    this.textureHeight = height
-    this.textureData = new Uint8Array(width * height * 4)
+    const [textureWidth, textureHeight] = computeTextureDimensions(length)
+    this.textureData = new Uint8Array(textureWidth * textureHeight * 4)
     this.data = new Float32Array(this.textureData.buffer, 0, this.width)
+    this.textureWidth = textureWidth
+    this.textureHeight = textureHeight
     this.texture = this.context.createTexture()!
     this.context.bindTexture(this.context.TEXTURE_2D, this.texture)
     this.context.texParameteri(this.context.TEXTURE_2D, this.context.TEXTURE_MIN_FILTER, this.context.NEAREST)
@@ -82,31 +60,15 @@ export class Float1D implements Disposable {
     this.push()
   }
 
-  /**
-   * gets the value at the given index.
-   * @param {number} x the index offset.
-   * @returns {number}
-   */
   public get(x: number): number {
     return this.data[x]
   }
 
-  /**
-   * sets the value at the given index.
-   * @param {number} x the index offset.
-   * @param {number} v the value to set.
-   * @returns {this}
-   */
   public set(x: number, v: number): this {
     this.data[x] = v
     return this
   }
 
-  /**
-   * applies a interior mutable map to this buffer.
-   * @param {Function} func the map function.
-   * @returns {this}
-   */
   public map(func: (x: number) => number): this {
     for (let x = 0; x < this.width; x++) {
       this.set(x, func(x))
@@ -114,10 +76,6 @@ export class Float1D implements Disposable {
     return this
   }
 
-  /**
-   * pushes local data to the GPU.
-   * @returns {void}
-   */
   public push(): this {
     this.context.bindTexture(this.context.TEXTURE_2D, this.texture)
     this.context.texImage2D(
@@ -135,10 +93,6 @@ export class Float1D implements Disposable {
     return this
   }
 
-  /**
-   * pulls data from the GPU.
-   * @returns {this}
-   */
   public pull(): this {
     this.context.bindFramebuffer(this.context.FRAMEBUFFER, this.framebuf)
     this.context.framebufferTexture2D(this.context.FRAMEBUFFER, this.context.COLOR_ATTACHMENT0, this.context.TEXTURE_2D, this.texture, 0)
@@ -150,45 +104,22 @@ export class Float1D implements Disposable {
     this.context.bindFramebuffer(this.context.FRAMEBUFFER, null)
     return this
   }
-  /**
-   * disposes of this object.
-   * @returns {void}
-   */
+
   public dispose(): void {
     this.context.deleteTexture(this.texture)
   }
 }
-/**
- * Float2D
- *
- * A 2 dimensional float buffer.
- */
+
 export class Float2D implements Disposable {
   public type: 'Float2D'
-  public context: WebGL2RenderingContext
-  public framebuf: WebGLFramebuffer
-  public width: number
-  public height: number
   public texture: WebGLTexture
   public textureWidth: number
   public textureHeight: number
   public textureData: Uint8Array
   public data: Float32Array
 
-  /**
-   * creates a new Float2D float buffer.
-   * @param {WebGL2RenderingContext} context the webgl rendering context.
-   * @param {WebGLFrameBuffer} framebuf the webgl framebuffer.
-   * @param {number} width the width of this data.
-   * @param {number} height the height of this data.
-   * @returns {Float2D}
-   */
-  constructor(context: WebGL2RenderingContext, framebuf: WebGLFramebuffer, width: number, height: number) {
+  constructor(private readonly context: WebGL2RenderingContext, private readonly framebuf: WebGLFramebuffer, public readonly width: number, public readonly height: number) {
     this.type = 'Float2D'
-    this.context = context
-    this.framebuf = framebuf
-    this.width = width
-    this.height = height
     this.textureWidth = width
     this.textureHeight = height
     this.textureData = new Uint8Array(width * height * 4)
@@ -202,32 +133,16 @@ export class Float2D implements Disposable {
     this.context.bindTexture(this.context.TEXTURE_2D, null)
     this.push()
   }
-  /**
-   * gets the value at the given index.
-   * @param {number} x the x offset.
-   * @param {number} y the y offset.
-   * @returns {number}
-   */
+
   public get(x: number, y: number): number {
     return this.data[x + y * this.width]
   }
-  /**
-   * sets the value at the given index.
-   * @param {number} x the x offset.
-   * @param {number} y the y offset.
-   * @param {number} v the value to set.
-   * @returns {this}
-   */
+
   public set(x: number, y: number, v: number): this {
     this.data[x + y * this.width] = v
     return this
   }
 
-  /**
-   * applies a interior mutable map to this buffer.
-   * @param {Function} func the map function.
-   * @returns {this}
-   */
   public map(func: (x: number, y: number) => number): this {
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
@@ -237,10 +152,6 @@ export class Float2D implements Disposable {
     return this
   }
 
-  /**
-   * pushes local data to the GPU.
-   * @returns {this}
-   */
   public push(): this {
     this.context.bindTexture(this.context.TEXTURE_2D, this.texture)
     this.context.texImage2D(
@@ -257,10 +168,7 @@ export class Float2D implements Disposable {
     this.context.bindTexture(this.context.TEXTURE_2D, null)
     return this
   }
-  /**
-   * pulls data from the GPU.
-   * @returns {this}
-   */
+
   public pull(): this {
     this.context.bindFramebuffer(this.context.FRAMEBUFFER, this.framebuf)
     this.context.framebufferTexture2D(this.context.FRAMEBUFFER, this.context.COLOR_ATTACHMENT0, this.context.TEXTURE_2D, this.texture, 0)
@@ -272,54 +180,27 @@ export class Float2D implements Disposable {
     this.context.bindFramebuffer(this.context.FRAMEBUFFER, null)
     return this
   }
-  /**
-   * disposes of this object.
-   * @returns {void}
-   */
+
   public dispose(): void {
     this.context.deleteTexture(this.texture)
   }
 }
-/**
- * Float3D
- *
- * A 3 dimensional float buffer.
- */
+
 export class Float3D implements Disposable {
   public type: 'Float3D'
-  public context: WebGL2RenderingContext
-  public framebuf: WebGLFramebuffer
-  public width: number
-  public height: number
-  public depth: number
   public texture: WebGLTexture
   public textureWidth: number
   public textureHeight: number
   public textureData: Uint8Array
   public data: Float32Array
 
-  /**
-   * creates a new Float3D float buffer.
-   * @param {WebGL2RenderingContext} context the webgl rendering context.
-   * @param {WebGLFrameBuffer} framebuf the webgl framebuffer.
-   * @param {number} width the width of this data.
-   * @param {number} height the height of this data.
-   * @param {number} depth the height of this data.
-   * @returns {Float3D}
-   */
-  constructor(context: WebGL2RenderingContext, framebuf: WebGLFramebuffer, width: number, height: number, depth: number) {
-    const size = compute_texture_dimensions(width * height * depth)
+  constructor(private readonly context: WebGL2RenderingContext, private readonly framebuf: WebGLFramebuffer, public readonly width: number, public readonly height: number, public readonly depth: number) {
     this.type = 'Float3D'
-    this.context = context
-    this.framebuf = framebuf
-    this.width = width
-    this.height = height
-    this.depth = depth
-    this.textureWidth = size.width
-    this.textureHeight = size.height
-    this.textureData = new Uint8Array(size.width * size.height * 4)
+    const [textureWidth, textureHeight] = computeTextureDimensions(width * height * depth)
+    this.textureData = new Uint8Array(textureWidth * textureHeight * 4)
     this.data = new Float32Array(this.textureData.buffer, 0, width * height * depth)
-
+    this.textureWidth = textureWidth
+    this.textureHeight = textureHeight
     this.texture = this.context.createTexture()!
     this.context.bindTexture(this.context.TEXTURE_2D, this.texture)
     this.context.texParameteri(this.context.TEXTURE_2D, this.context.TEXTURE_MIN_FILTER, this.context.NEAREST)
@@ -329,33 +210,16 @@ export class Float3D implements Disposable {
     this.context.bindTexture(this.context.TEXTURE_2D, null)
     this.push()
   }
-  /**
-   * gets the value at the given index.
-   * @param {number} x the x offset.
-   * @param {number} y the y offset.
-   * @param {number} z the z offset.
-   * @returns {number}
-   */
+
   public get(x: number, y: number, z: number): number {
     return this.data[x + y * this.width + z * (this.width * this.height)]
   }
-  /**
-   * sets the value at the given index.
-   * @param {number} x the x offset.
-   * @param {number} y the y offset.
-   * @param {number} z the z offset.
-   * @param {number} v the value to set.
-   * @returns {this}
-   */
+
   public set(x: number, y: number, z: number, v: number): this {
     this.data[x + y * this.width + z * (this.width * this.height)] = v
     return this
   }
-  /**
-   * applies a interior mutable map to this buffer.
-   * @param {Function} func the map function.
-   * @returns {this}
-   */
+
   public map(func: (x: number, y: number, z: number) => number): this {
     for (let z = 0; z < this.depth; z++) {
       for (let y = 0; y < this.height; y++) {
@@ -366,10 +230,7 @@ export class Float3D implements Disposable {
     }
     return this
   }
-  /**
-   * pushes local data to the GPU.
-   * @returns {this}
-   */
+
   public push(): this {
     this.context.bindTexture(this.context.TEXTURE_2D, this.texture)
     this.context.texImage2D(
@@ -386,10 +247,7 @@ export class Float3D implements Disposable {
     this.context.bindTexture(this.context.TEXTURE_2D, null)
     return this
   }
-  /**
-   * pulls data from the GPU.
-   * @returns {this}
-   */
+
   public pull(): this {
     this.context.bindFramebuffer(this.context.FRAMEBUFFER, this.framebuf)
     this.context.framebufferTexture2D(this.context.FRAMEBUFFER, this.context.COLOR_ATTACHMENT0, this.context.TEXTURE_2D, this.texture, 0)
@@ -401,10 +259,7 @@ export class Float3D implements Disposable {
     this.context.bindFramebuffer(this.context.FRAMEBUFFER, null)
     return this
   }
-  /**
-   * disposes of this object.
-   * @returns {void}
-   */
+
   public dispose(): void {
     this.context.deleteTexture(this.texture)
   }
