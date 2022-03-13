@@ -4,8 +4,9 @@
   "description": "neuron-gpgpu",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": "tsc-bundle ./test/index.ts ./bin/neuron.js --watch --removeComments"
+    "clean": "hammer task clean",
+    "format": "hammer task format",
+    "start": "hammer task start"
   },
   "keywords": [
     "neural",
@@ -14,5 +15,9 @@
     "javascript"
   ],
   "author": "sinclairzx81",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@sinclair/hammer": "^0.16.3",
+    "prettier": "^2.5.1"
+  }
 }

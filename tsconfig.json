@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "strict": true,
+        "moduleResolution": "node",
+        "target": "ESNext",
+        "module": "CommonJS",
+        "esModuleInterop": true,
+        "jsx": "react",
+        "baseUrl": ".",
+        "paths": {
+            "@sinclair/neuron":     ["libs/neuron/index.ts"],
+        }
+    }
+}
