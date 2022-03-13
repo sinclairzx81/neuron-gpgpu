@@ -1,4 +1,4 @@
-# neuron-gpgpu
+# Neuron
 
 A GPGPU Multi Layer Perception Network for WebGL 2.0
 
