@@ -28,5 +28,4 @@ THE SOFTWARE.
 
 import * as gpu from './gpu/index'
 import * as net from './net/index'
-
 export { gpu, net }

@@ -1,17 +1,19 @@
 # neuron-gpgpu
 
-A GPGPU implementation of a multi layer perceptron network targetting webgl 2.0.
+A GPGPU Multi Layer Perception Network for WebGL 2.0
 
-### overview
+## Overview
 
-This project is a small experiment to test processing forward and back propagation algorithms on a GPU via WebGL 2. 
+This project is a GPU accellerated Multi Layer Perception Network built for WebGL 2.0. It implements both forward and back propagation on the GPU and is intended to be used for interactive training session. The network only implements tanh activation (-1, 1) so training data needs to map to and from these ranges.
 
-### example
+License MIT
+
+## Example
 
 ```javascript
 
 //------------------------------------------------------
-//  network topology
+//  Topology
 //
 //    0 0     <--- input layer
 //  / /|\ \
@@ -22,6 +24,7 @@ This project is a small experiment to test processing forward and back propagati
 //     0      <--- output layer
 //
 //------------------------------------------------------
+
 import {gpu, net} from "neuron"
 
 const context = new gpu.Context()
@@ -32,7 +35,9 @@ const network = new net.Network(context, [
   new net.Tensor(1)
 ])
 
-// XOR training data.
+//------------------------------------------------------
+// Train for XOR inference
+//------------------------------------------------------
 setInterval(() => {
 
   network.backward([0, 0], [0])  
